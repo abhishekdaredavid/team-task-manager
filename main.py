@@ -1,3 +1,5 @@
+import os
+import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
@@ -93,3 +95,6 @@ def update_task_status(task_id: int, status: str, db: Session = Depends(get_db),
     task.status = status
     db.commit()
     return {"message": f"Task marked as {status}", "new_status": task.status}
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
