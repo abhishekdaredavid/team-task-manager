@@ -95,15 +95,21 @@
         // Create Task API Call
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const projectId = document.getElementById('task-proj-id').value;
+            
+            // Backend ko integer chahiye, isliye parseInt lagaya
+            const projectId = parseInt(document.getElementById('task-proj-id').value);
+            const assignedTo = parseInt(document.getElementById('task-user-id').value);
+            
             const taskData = {
                 title: document.getElementById('task-title').value,
-                due_date: document.getElementById('task-date').value,
-                assigned_to: parseInt(document.getElementById('task-user-id').value),
-                status: "Pending"
+                // Hum due_date ko description banakar bhej rahe hain taaki backend khush rahe
+                description: "Due Date: " + document.getElementById('task-date').value,
+                project_id: projectId,
+                assigned_to: assignedTo
             };
 
-            const res = await fetch(`${API_URL}/tasks?project_id=${projectId}`, {
+            // URL se ?project_id= hata diya, kyunki ab data body mein ja raha hai
+            const res = await fetch(`${API_URL}/tasks`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -113,11 +119,11 @@
             });
 
             if (res.ok) {
-                alert("Task Assigned Successfully!");
+                alert("Task Assigned Successfully! 🎉");
                 document.getElementById('task-form').reset();
             } else {
                 const error = await res.json();
-                alert("Error: " + (error.detail || "Could not assign task"));
+                alert("Error: " + JSON.stringify(error.detail));
             }
         });
     </script>
