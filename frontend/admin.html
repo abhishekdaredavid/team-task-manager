@@ -55,12 +55,12 @@
     </div>
 
     <script>
-        const API_URL = "team-task-manager-production-46fb.up.railway.app";
+        const API_URL = "https://team-task-manager-production-46fb.up.railway.app";
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
 
         // Security check
-        if (!token || role !== 'admin') {
+        if (!token || role !== 'Admin') {
             window.location.href = 'index.html';
         }
 

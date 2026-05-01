@@ -30,8 +30,8 @@
     </div>
 
     <script>
-        // YAHAN APNA RAILWAY URL DALEIN (Bina aakhri '/' ke)
-        const API_URL = "https://your-app-name.up.railway.app"; 
+        
+        const API_URL = "https://team-task-manager-production-46fb.up.railway.app"; 
 
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
@@ -88,6 +88,7 @@
                     messageBox.innerText = "Login Successful!";
                     // Save token and redirect
                     localStorage.setItem("token", data.access_token);
+                    localStorage.setItem("role", data.role);
                     if (data.role === "Admin") {
                         window.location.href = "admin.html";
                     } else {
