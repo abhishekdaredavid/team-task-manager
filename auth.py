@@ -1,19 +1,20 @@
-from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
+import bcrypt  # Humne passlib hata diya hai, seedha bcrypt use karenge
 
 SECRET_KEY = "your_super_secret_key_here"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# Fixed for Python 3.13 compatibility
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__ident="2b")
-
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    # Password check karne ka naya tarika
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    # Password hash karne ka direct aur safe tarika
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 def create_access_token(data: dict):
     to_encode = data.copy()
