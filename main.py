@@ -6,7 +6,7 @@ import os
 
 app = FastAPI()
 
-# --- CORS SETTINGS (Zaroori for local testing) ---
+# CORS Fix for local frontend to live backend connection
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,7 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create tables
 models.Base.metadata.create_all(bind=database.engine)
 
 @app.post("/signup", response_model=schemas.UserOut)
@@ -45,7 +44,7 @@ def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
     token = auth.create_access_token(data={"sub": db_user.email, "role": db_user.role, "id": db_user.id})
     return {"access_token": token, "token_type": "bearer", "role": db_user.role, "id": db_user.id}
 
-# --- PORT BINDING FOR RAILWAY ---
+# Final Railway Port Binding
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))

@@ -6,7 +6,7 @@ SECRET_KEY = "your_super_secret_key_here"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# Python 3.13 fix: added bcrypt__ident="2b"
+# Fixed for Python 3.13 compatibility
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__ident="2b")
 
 def verify_password(plain_password, hashed_password):

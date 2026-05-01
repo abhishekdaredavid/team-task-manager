@@ -1,53 +1,27 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
-from datetime import date
+from typing import Optional
 
-# ---- USER SCHEMAS ----
 class UserCreate(BaseModel):
-    name: str
     email: EmailStr
     password: str
-    role: str = "member"
+    full_name: str
+    role: str
 
-class UserResponse(BaseModel):
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserOut(BaseModel):
     id: int
-    name: str
-    email: str
+    email: EmailStr
+    full_name: str
     role: str
 
     class Config:
         from_attributes = True
 
-# ---- TASK SCHEMAS ----
-class TaskBase(BaseModel):
-    title: str
-    description: Optional[str] = None
-    due_date: date
-    status: str = "Pending"
-
-class TaskCreate(TaskBase):
-    assigned_to: int
-
-class TaskResponse(TaskBase):
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    role: str
     id: int
-    project_id: int
-    assigned_to: int
-
-    class Config:
-        from_attributes = True
-
-# ---- PROJECT SCHEMAS ----
-class ProjectBase(BaseModel):
-    name: str
-    description: Optional[str] = None
-
-class ProjectCreate(ProjectBase):
-    pass
-
-class ProjectResponse(ProjectBase):
-    id: int
-    created_by: int
-    tasks: List[TaskResponse] = []
-
-    class Config:
-        from_attributes = True
