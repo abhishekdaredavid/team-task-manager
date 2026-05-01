@@ -6,7 +6,7 @@ import os
 
 app = FastAPI()
 
-# CORS Fix for local frontend to live backend connection
+# CORS Fix for local frontend connection
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,7 +44,7 @@ def login(user: schemas.UserLogin, db: Session = Depends(database.get_db)):
     token = auth.create_access_token(data={"sub": db_user.email, "role": db_user.role, "id": db_user.id})
     return {"access_token": token, "token_type": "bearer", "role": db_user.role, "id": db_user.id}
 
-# Final Railway Port Binding
+# Railway Port Binding Fix
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
