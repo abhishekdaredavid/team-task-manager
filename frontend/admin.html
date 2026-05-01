@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <nav class="bg-blue-600 p-4 text-white flex justify-between items-center shadow-md">
+        <h1 class="text-xl font-bold">Admin Dashboard</h1>
+        <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600 transition">Logout</button>
+    </nav>
+
+    <div class="container mx-auto mt-8 p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4 border-b pb-2">Create New Project</h2>
+            <form id="project-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium">Project Name</label>
+                    <input type="text" id="proj-name" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Description</label>
+                    <textarea id="proj-desc" class="w-full border p-2 rounded"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Create Project</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4 border-b pb-2">Assign New Task</h2>
+            <form id="task-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium">Project ID</label>
+                    <input type="number" id="task-proj-id" required class="w-full border p-2 rounded" placeholder="e.g. 1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Assignee (User ID)</label>
+                    <input type="number" id="task-user-id" required class="w-full border p-2 rounded" placeholder="e.g. 2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Task Title</label>
+                    <input type="text" id="task-title" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Due Date</label>
+                    <input type="date" id="task-date" required class="w-full border p-2 rounded">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Assign Task</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+
+        // Security check
+        if (!token || role !== 'admin') {
+            window.location.href = 'index.html';
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Create Project API Call
+        document.getElementById('project-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('proj-name').value;
+            const description = document.getElementById('proj-desc').value;
+
+            const res = await fetch(`${API_URL}/projects`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ name, description })
+            });
+
+            if (res.ok) {
+                alert("Project Created Successfully!");
+                document.getElementById('project-form').reset();
+            } else {
+                alert("Error creating project");
+            }
+        });
+
+        // Create Task API Call
+        document.getElementById('task-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const projectId = document.getElementById('task-proj-id').value;
+            const taskData = {
+                title: document.getElementById('task-title').value,
+                due_date: document.getElementById('task-date').value,
+                assigned_to: parseInt(document.getElementById('task-user-id').value),
+                status: "Pending"
+            };
+
+            const res = await fetch(`${API_URL}/tasks?project_id=${projectId}`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify(taskData)
+            });
+
+            if (res.ok) {
+                alert("Task Assigned Successfully!");
+                document.getElementById('task-form').reset();
+            } else {
+                const error = await res.json();
+                alert("Error: " + (error.detail || "Could not assign task"));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Task Manager - Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Team Task Manager</h2>
+        
+        <div class="flex justify-center mb-6 border-b pb-2">
+            <button id="show-login" class="px-4 py-2 font-semibold text-blue-600 border-b-2 border-blue-600">Login</button>
+            <button id="show-signup" class="px-4 py-2 font-semibold text-gray-500">Sign Up</button>
+        </div>
+
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="login-email" required class="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="login-password" required class="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Login</button>
+            <p id="login-error" class="text-red-500 text-sm mt-2 hidden"></p>
+        </form>
+
+        <form id="signup-form" class="space-y-4 hidden">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" id="signup-name" required class="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="signup-email" required class="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="signup-password" required class="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Role</label>
+                <select id="signup-role" class="mt-1 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300">
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">Sign Up</button>
+            <p id="signup-message" class="text-sm mt-2 hidden"></p>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+
+        // UI Toggle Logic
+        document.getElementById('show-signup').addEventListener('click', () => {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('signup-form').classList.remove('hidden');
+            document.getElementById('show-signup').classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            document.getElementById('show-signup').classList.remove('text-gray-500');
+            document.getElementById('show-login').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            document.getElementById('show-login').classList.add('text-gray-500');
+        });
+
+        document.getElementById('show-login').addEventListener('click', () => {
+            document.getElementById('signup-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('show-login').classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            document.getElementById('show-login').classList.remove('text-gray-500');
+            document.getElementById('show-signup').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            document.getElementById('show-signup').classList.add('text-gray-500');
+        });
+
+        // Signup Logic
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const role = document.getElementById('signup-role').value;
+            const msgEl = document.getElementById('signup-message');
+
+            try {
+                const response = await fetch(`${API_URL}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role })
+                });
+                
+                const data = await response.json();
+                msgEl.classList.remove('hidden');
+                
+                if (response.ok) {
+                    msgEl.className = "text-green-600 text-sm mt-2";
+                    msgEl.innerText = "Signup successful! Please login.";
+                    setTimeout(() => document.getElementById('show-login').click(), 1500);
+                } else {
+                    msgEl.className = "text-red-500 text-sm mt-2";
+                    msgEl.innerText = data.detail || "Signup failed";
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // Login Logic
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+
+            const formData = new URLSearchParams();
+            formData.append('username', email); // OAuth2 expects 'username'
+            formData.append('password', password);
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Token save karna taki aage use kar sakein
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('role', data.role);
+                    
+                    // Role ke hisaab se redirect
+                    if (data.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'member.html';
+                    }
+                } else {
+                    errorEl.classList.remove('hidden');
+                    errorEl.innerText = data.detail || "Invalid credentials";
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
